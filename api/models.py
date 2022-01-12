@@ -9,6 +9,7 @@ class Tag(models.Model):
 
 
 class Image(models.Model):
+    image_id = models.BigAutoField(primary_key=True)
     description = models.TextField(max_length=200)
     is_public = models.BooleanField()
     url = models.TextField()

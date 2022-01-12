@@ -21,11 +21,15 @@ def add_image(request):
             image_tag = ImageTags.objects.create(image=image_inst, tag=tag['tag'])
             image_tag.save()
 
-        new_data = [tag['tag'].data for tag in tags if tag['is_new']] + [image.data]
-        return Response(new_data, status=status.HTTP_201_CREATED)
+        return Response(image.data, status=status.HTTP_201_CREATED)
 
     errors = [tag['tag'].error for tag in tags if tag['is_new']] + [image.errors]
     return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def search(request):
+    return Response({}, status=status.HTTP_200_OK)
 
 
 def get_tags(tags) -> List[Dict[str, Any]]:
