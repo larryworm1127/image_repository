@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import Image, Tag
+from api.models import ImageMetadata, Tag
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -11,5 +11,5 @@ class TagSerializer(serializers.ModelSerializer):
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Image
+        model = ImageMetadata
         fields = "__all__"

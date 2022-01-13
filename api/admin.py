@@ -1,3 +1,7 @@
 from django.contrib import admin
 
-# Register your models here.
+from api.models import ImageMetadata, Tag, ImageTags
+
+admin.site.register(ImageMetadata)
+admin.site.register(Tag)
+admin.site.register(ImageTags)

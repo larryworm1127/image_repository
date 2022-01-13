@@ -140,3 +140,4 @@ cython_debug/
 
 .idea
 test_images
+image_storage
