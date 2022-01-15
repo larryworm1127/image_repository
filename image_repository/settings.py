@@ -53,6 +53,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'image_repository.urls'
 
+REST_FRAMEWORK = {
+    'TEST_REQUEST_RENDERER_CLASSES': [
+        'rest_framework.renderers.MultiPartRenderer',
+        'rest_framework.renderers.JSONRenderer'
+    ]
+}
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
