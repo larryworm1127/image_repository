@@ -18,13 +18,15 @@ class ImageMetadata(models.Model):
     location = models.TextField()
 
     def __str__(self):
-        return f'ID={self.image_id}, ' \
-               f'Desc={self.name}, ' \
-               f'Public={self.is_public}, ' \
-               f'Type={self.file_type}, ' \
-               f'Location={self.location}'
+        return (
+            f'ID={self.image_id}, '
+            f'Name={self.name}, '
+            f'Public={self.is_public}, '
+            f'Type={self.file_type}, '
+            f'Location={self.location}'
+        )
 
 
 class ImageTags(models.Model):
-    image = models.ForeignKey(ImageMetadata, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    image = models.ForeignKey(ImageMetadata, on_delete=models.DO_NOTHING)
+    tag = models.ForeignKey(Tag, on_delete=models.DO_NOTHING)

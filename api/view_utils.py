@@ -1,12 +1,12 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple, Optional
 
 from django.core.exceptions import ObjectDoesNotExist
 
-from api.models import Tag, ImageTags
+from api.models import Tag, ImageTags, ImageMetadata
 from api.serializer import TagSerializer, ImageSerializer
 
 
-def process_image_metadata(data):
+def process_image_metadata(data) -> Tuple[Any, Optional[ImageMetadata]]:
     image_serializer = ImageSerializer(data=data)
 
     tags = get_tags(data['tags'])
@@ -21,10 +21,9 @@ def process_image_metadata(data):
             image_tag = ImageTags.objects.create(image=image, tag=tag['tag'])
             image_tag.save()
 
-        return True, f"Image {image.name} created with ID {image.image_id}", image
+        return image_serializer.data, image
 
-    errors = [tag['tag'].error for tag in tags if tag['is_new']] + [image_serializer.errors]
-    return False, errors, None
+    return image_serializer.errors, None
 
 
 def get_tags(tags) -> List[Dict[str, Any]]:

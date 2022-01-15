@@ -1,6 +1,7 @@
 import json
 
 from django.http import FileResponse
+from django.conf import settings
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser
@@ -19,11 +20,11 @@ class AddImage(APIView):
         print(request.data)
         image_file = request.data['file']
         metadata = json.loads(request.data['metadata'])
-        metadata['location'] = "image_storage/"
+        metadata['location'] = settings.IMAGE_STORAGE
 
         # Process metadata before saving image to storage
-        success, message, image = process_image_metadata(metadata)
-        if not success:
+        message, image = process_image_metadata(metadata)
+        if image is None:
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
         with open(image.location, 'wb') as f:

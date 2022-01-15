@@ -26,7 +26,7 @@
 2. Create a virtual environment: `python -m venv env`
 3. Activate the virtual environment: `source env/bin/activate`
 4. Install the required Python packages: `pip install -r requirements.txt`
-
+5. Create database instance: `python manage.py migrate`
 
 ## Usage
 

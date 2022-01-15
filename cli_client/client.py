@@ -37,7 +37,8 @@ def add_image(path: str, metadata: Metadata) -> str:
     if response.status_code != 201:
         return response.text
     else:
-        return f"Image {metadata.name} uploaded successfully!"
+        data = json.loads(response.text)
+        return f"Image {data['name']} created with ID {data['image_id']}"
 
 
 def search_by_tags(tags: List[str]) -> str:
