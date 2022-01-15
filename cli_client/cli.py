@@ -2,9 +2,10 @@ import imghdr
 import os.path
 from typing import List
 
-import fire
+from .client import add_image, Metadata, search_by_tags, get_image_file
 
-from client import add_image, Metadata, search_by_tags, get_image_file
+
+__all__ = ['add_single_image', 'add_multiple_images', 'tag_search', 'get_image']
 
 
 def add_single_image(path: str, description: str = "", is_public: bool = True,
@@ -57,8 +58,11 @@ def add_multiple_images(path: str, descriptions: List[str] = None,
         return
 
     for i, image in enumerate(os.listdir(path)):
-        if imghdr.what(image) is not None:
-            add_single_image(image, descriptions[i], is_public, tags[i])
+        image_path = os.path.join(path, image)
+        if imghdr.what(image_path) is not None:
+            description = "" if descriptions is None else descriptions[i]
+            tag = [] if tags is None else tags[i]
+            add_single_image(image_path, description, is_public, tag)
 
 
 def tag_search(tags: List[str]) -> None:
@@ -88,12 +92,3 @@ def get_image(image_id: int, path: str = ".") -> None:
 
     response = get_image_file(image_id, path, os.path.isdir(path))
     print(response)
-
-
-if __name__ == '__main__':
-    fire.Fire({
-        'add_image': add_single_image,
-        'add_images': add_multiple_images,
-        'tag_search': tag_search,
-        'get_image': get_image
-    })

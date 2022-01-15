@@ -8,9 +8,6 @@ import requests
 
 __all__ = ['Metadata', 'add_image', 'search_by_tags', 'get_image_file']
 
-UPLOAD_SUCCESS = "Image uploaded successfully!"
-DOWNLOAD_SUCCESS = "Image downloaded successfully"
-
 Metadata = namedtuple(
     'Metadata',
     [
@@ -37,7 +34,10 @@ def add_image(path: str, metadata: Metadata) -> str:
     }
 
     response = requests.request("POST", url, headers=headers, files=files)
-    return response.text if response.status_code != 201 else UPLOAD_SUCCESS
+    if response.status_code != 201:
+        return response.text
+    else:
+        return f"Image {metadata.name} uploaded successfully!"
 
 
 def search_by_tags(tags: List[str]) -> str:
@@ -66,4 +66,4 @@ def get_image_file(image_id: int, path: str, is_dir: bool) -> str:
     with open(save_path, 'wb') as f:
         f.write(response.content)
 
-    return DOWNLOAD_SUCCESS
+    return f"Image {filename} downloaded successfully"
