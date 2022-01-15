@@ -7,6 +7,8 @@ name = "pypi"
 django = "*"
 djangorestframework = "*"
 pillow = "*"
+requests = "*"
+fire = "*"
 
 [dev-packages]
 

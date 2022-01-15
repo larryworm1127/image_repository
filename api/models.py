@@ -13,7 +13,7 @@ class ImageMetadata(models.Model):
     name = models.TextField(max_length=50)
     file_type = models.TextField(max_length=10)
     size = models.IntegerField()
-    description = models.TextField(max_length=200)
+    description = models.TextField(max_length=200, blank=True)
     is_public = models.BooleanField()
     location = models.TextField()
 
