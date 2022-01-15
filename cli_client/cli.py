@@ -4,7 +4,7 @@ from typing import List
 
 import fire
 
-from client import add_image, Metadata
+from client import add_image, Metadata, search_by_tags, get_image_file
 
 
 def add_single_image(path: str, description: str = "", is_public: bool = True,
@@ -15,7 +15,6 @@ def add_single_image(path: str, description: str = "", is_public: bool = True,
     :param description: the description of the image.
     :param is_public: the visibility level of image in the repo.
     :param tags: the tags that categorize the image
-    :return:
     """
     if not os.path.exists(path):
         print(f"Given {path} does not exists.")
@@ -35,7 +34,7 @@ def add_single_image(path: str, description: str = "", is_public: bool = True,
         tags=[] if tags is None else [{"name": tag} for tag in tags]
     )
 
-    success, message = add_image(path, metadata)
+    message = add_image(path, metadata)
     print(message)
 
 
@@ -48,7 +47,6 @@ def add_multiple_images(path: str, descriptions: List[str] = None,
     :param descriptions: a list of descriptions for each image
     :param is_public:
     :param tags:
-    :return:
     """
     if not os.path.exists(path):
         print(f"Given {path} does not exists.")
@@ -63,8 +61,39 @@ def add_multiple_images(path: str, descriptions: List[str] = None,
             add_single_image(image, descriptions[i], is_public, tags[i])
 
 
+def tag_search(tags: List[str]) -> None:
+    """Search for images that have specific tags.
+
+    This command only prints out the metadata for the images. To get
+    the actual image, please use <get_image> command.
+
+    :param tags: a list of tags to search the image by.
+    """
+    response = search_by_tags(tags)
+    print(response)
+
+
+def get_image(image_id: int, path: str = ".") -> None:
+    """Downloads an image from the repository given the ID.
+
+    :param image_id: the ID of the image.
+    :param path: the file path to save the image to.
+    """
+    if not os.path.exists(path):
+        print(f"Given {path} does not exists.")
+        return
+
+    if path == ".":
+        path = os.path.abspath(path)
+
+    response = get_image_file(image_id, path, os.path.isdir(path))
+    print(response)
+
+
 if __name__ == '__main__':
     fire.Fire({
         'add_image': add_single_image,
-        'add_images': add_multiple_images
+        'add_images': add_multiple_images,
+        'tag_search': tag_search,
+        'get_image': get_image
     })

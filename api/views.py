@@ -1,12 +1,13 @@
 import json
 
+from django.http import FileResponse
 from rest_framework import status
-from rest_framework.generics import get_object_or_404
+from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.models import Tag, ImageTags
+from api.models import Tag, ImageTags, ImageMetadata
 from api.serializer import ImageSerializer
 from api.view_utils import process_image_metadata
 
@@ -33,14 +34,40 @@ class AddImage(APIView):
 
 class TagSearch(APIView):
 
-    def get(self, request, tag):
-        tag_obj = get_object_or_404(Tag.objects.get_queryset(), name=tag)
-        image_tags = ImageTags.objects.filter(tag__name=tag_obj.name)
-        image_data = [ImageSerializer(image_tag.image).data for image_tag in image_tags]
+    def get(self, request):
+        image_tags = None
+        for tag in request.data:
+            try:
+                tag_obj = Tag.objects.get(name=tag)
+            except Tag.DoesNotExist:
+                raise NotFound(f"Tag {tag} does not exist")
+
+            if image_tags is None:
+                image_tags = ImageTags.objects.filter(tag__name=tag_obj.name).values('image_id')
+                continue
+
+            curr = ImageTags.objects.filter(tag__name=tag_obj.name).values('image_id')
+            image_tags = image_tags.intersection(curr)
+
+        image_data = [
+            ImageSerializer(
+                ImageMetadata.objects.get(image_id=item['image_id'])
+            ).data
+            for item in image_tags
+        ]
         return Response(image_data)
 
 
 class GetImage(APIView):
 
     def get(self, request, image_id):
-        return Response()
+        try:
+            image = ImageMetadata.objects.get(image_id=image_id)
+        except ImageMetadata.DoesNotExist:
+            raise NotFound(f"Image not found with ID {image_id}")
+
+        return FileResponse(
+            open(image.location, 'rb'),
+            filename=image.name,
+            content_type=f'image/{image.file_type}'
+        )
