@@ -61,7 +61,7 @@ To run all existing tests, run `python manage.py test` under virtual environment
 
 ## TODO
 
-- Add multithreading for multiple images upload from client
+- Add multithreading for multiple images upload from client (complete)
 - Full text search for image description
 - Image hashing for preventing duplicate images in repo and for searching 
 similar images

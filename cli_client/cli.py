@@ -1,9 +1,9 @@
 import imghdr
 import os.path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List
 
 from .client import add_image, Metadata, search_by_tags, get_image_file
-
 
 __all__ = ['add_single_image', 'add_multiple_images', 'tag_search', 'get_image']
 
@@ -60,12 +60,21 @@ def add_multiple_images(path: str, descriptions: List[str] = None,
         print(f"Given {path} is not a directory.")
         return
 
-    for i, image in enumerate(os.listdir(path)):
-        image_path = os.path.join(path, image)
-        if imghdr.what(image_path) is not None:
+    processes = []
+    with ThreadPoolExecutor() as executor:
+        for i, image in enumerate(os.listdir(path)):
+            image_path = os.path.join(path, image)
+            if imghdr.what(image_path) is None:
+                continue
+
             description = "" if descriptions is None else descriptions[i]
             tag = [] if tags is None else tags[i]
-            add_single_image(image_path, description, is_public, tag)
+            process = executor.submit(add_single_image, image_path, description, is_public, tag)
+            processes.append(process)
+
+    for task in as_completed(processes):
+        if task.result():
+            print(task.result())
 
 
 def tag_search(tags: List[str]) -> None:
