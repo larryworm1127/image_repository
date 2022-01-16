@@ -25,8 +25,8 @@ class AddImageTests(APITestCase):
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
 
-    def send_request(self, description: str = "test", is_public: bool = False,
-                     file_type: str = "jpg", tags: List[Dict[str, str]] = None):
+    def add_image(self, description: str = "test", is_public: bool = False,
+                  file_type: str = "jpg", tags: List[Dict[str, str]] = None):
         if tags is None:
             tags = [{"name": "test1"}]
 
@@ -50,14 +50,14 @@ class AddImageTests(APITestCase):
             return response
 
     def test_add_image_invalid(self):
-        response = self.send_request(file_type="testtesttesttest")
+        response = self.add_image(file_type="testtesttesttest")
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertEqual(0, len(ImageMetadata.objects.all()))
         self.assertEqual(os.listdir(self.temp_dir.name), [])
         self.assertIn('file_type', response.json())
 
     def test_add_image_valid(self):
-        response = self.send_request()
+        response = self.add_image()
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertEqual(1, len(ImageMetadata.objects.all()))
 
@@ -120,4 +120,20 @@ class TagSearchTests(APITestCase):
             {'tags': json.dumps(['t1'])},
         )
 
-        self.assertEqual(5, len(response.json()))
+        response_json = response.json()
+        self.assertEqual(5, len(response_json))
+
+        image_ids = [image["image_id"] for image in response_json]
+        self.assertEqual([1, 2, 3, 4, 5], image_ids)
+
+    def test_multi_tag_search(self):
+        response = self.client.get(
+            reverse('tag_search'),
+            {'tags': json.dumps(['t1', 't3'])},
+        )
+
+        response_json = response.json()
+        self.assertEqual(2, len(response_json))
+
+        image_ids = [image["image_id"] for image in response_json]
+        self.assertEqual([1, 4], image_ids)
