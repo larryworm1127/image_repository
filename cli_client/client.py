@@ -42,14 +42,14 @@ def add_image(path: str, metadata: Metadata) -> str:
 
 
 def search_by_tags(tags: List[str]) -> str:
-    url = f"http://localhost:8000/api/images/tag"
+    url = f"http://localhost:8000/api/images/tag?"
 
-    payload = json.dumps(tags)
+    payload = {'tags': json.dumps(tags)}
     headers = {
         'Content-Type': 'application/json'
     }
 
-    response = requests.request("GET", url, headers=headers, data=payload)
+    response = requests.request("GET", url, headers=headers, params=payload)
     return response.text
 
 
@@ -63,8 +63,8 @@ def get_image_file(image_id: int, path: str, is_dir: bool) -> str:
     header_dis = response.headers['Content-Disposition']
     filename = re.findall("filename=(.+)", header_dis)[0].strip('"')
     save_path = os.path.join(path, filename) if is_dir else path
-    print(save_path)
+
     with open(save_path, 'wb') as f:
         f.write(response.content)
 
-    return f"Image {filename} downloaded successfully"
+    return f"Image {save_path} downloaded successfully"

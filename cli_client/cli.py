@@ -12,10 +12,13 @@ def add_single_image(path: str, description: str = "", is_public: bool = True,
                      tags: List[str] = None) -> None:
     """Add a single image to the image repository.
 
+    Example:
+    python main.py add_image pic.jpg --description="test" --tags=[tag1,tag2]
+
     :param path: the file path to the image.
     :param description: the description of the image.
     :param is_public: the visibility level of image in the repo.
-    :param tags: the tags that categorize the image
+    :param tags: the tags that categorize the image (example: [tag1,tag2])
     """
     if not os.path.exists(path):
         print(f"Given {path} does not exists.")
@@ -46,8 +49,8 @@ def add_multiple_images(path: str, descriptions: List[str] = None,
 
     :param path: the path to the directory
     :param descriptions: a list of descriptions for each image
-    :param is_public:
-    :param tags:
+    :param is_public: the visibility level of all the images in the repo.
+    :param tags: a list of tag list that categorize each image in folder.
     """
     if not os.path.exists(path):
         print(f"Given {path} does not exists.")
@@ -71,7 +74,7 @@ def tag_search(tags: List[str]) -> None:
     This command only prints out the metadata for the images. To get
     the actual image, please use <get_image> command.
 
-    :param tags: a list of tags to search the image by.
+    :param tags: a list of tags to search the image by. (example: [tag1,tag2])
     """
     response = search_by_tags(tags)
     print(response)

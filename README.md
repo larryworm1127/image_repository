@@ -31,7 +31,8 @@
 ## Usage
 
 Before doing anything, start up Django server: `python manage.py runserver`
-so that all the CLI commands can be correctly processed.
+under virtual environment so that all the CLI commands can be correctly 
+processed.
 
 To see all the available commands in CLI, run `python main.py --help`
 
@@ -44,6 +45,11 @@ Here is a list of available operations:
 - Get the specific image from repository using its ID.
 
 
+## Tests
+
+To run all existing tests, run `python manage.py test` under virtual environment
+
+
 ## API Endpoints
 
 | Endpoint               | Type | Description          | Body |
@@ -51,3 +57,13 @@ Here is a list of available operations:
 | /api/images            | POST | Add images           |      |
 | /api/images/tag        | GET  | Search for images    |      |
 | /api/images/{image_id} | GET  | Get a specific image |      |
+
+
+## TODO
+
+- Add multithreading for multiple images upload from client
+- Full text search for image description
+- Image hashing for preventing duplicate images in repo and for searching 
+similar images
+- Authentication for private/public image.
+- Simple HTML page for seeing public thumbnails for public images.

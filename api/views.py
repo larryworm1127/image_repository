@@ -5,6 +5,7 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -35,9 +36,9 @@ class AddImage(APIView):
 
 class TagSearch(APIView):
 
-    def get(self, request):
+    def get(self, request: Request):
         image_tags = None
-        for tag in request.data:
+        for tag in json.loads(request.query_params.get('tags')):
             try:
                 tag_obj = Tag.objects.get(name=tag)
             except Tag.DoesNotExist:
