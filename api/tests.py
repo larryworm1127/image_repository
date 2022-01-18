@@ -18,11 +18,11 @@ class ImageTests(APITestCase):
 
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
-        self.temp_static = tempfile.TemporaryDirectory()
+        self.temp_media = tempfile.TemporaryDirectory()
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
-        self.temp_static.cleanup()
+        self.temp_media.cleanup()
 
     @staticmethod
     def get_random_image():
@@ -57,7 +57,7 @@ class ImageTests(APITestCase):
 
         with self.settings(
                 IMAGE_STORAGE=os.path.join(self.temp_dir.name, ''),
-                STATIC_ROOT=os.path.join(self.temp_static.name, '')
+                MEDIA_ROOT=os.path.join(self.temp_media.name, '')
         ):
             response = self.client.post(
                 reverse('add_image'),
@@ -76,7 +76,7 @@ class AddImageTests(ImageTests):
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertEqual(0, ImageMetadata.objects.all().count())
         self.assertEqual(os.listdir(self.temp_dir.name), [])
-        self.assertEqual(os.listdir(self.temp_static.name), [])
+        self.assertEqual(os.listdir(self.temp_media.name), [])
         self.assertIn('file_type', response.json())
 
     def test_add_image_duplicate(self):
@@ -96,7 +96,7 @@ class AddImageTests(ImageTests):
 
         image = ImageMetadata.objects.all()[0]
         self.assertEqual(os.listdir(self.temp_dir.name)[0], f"{image.image_id}.{image.file_type}")
-        self.assertEqual(os.listdir(self.temp_static.name)[0], f"{image.image_id}.{image.file_type}")
+        self.assertEqual(os.listdir(self.temp_media.name)[0], f"{image.image_id}.{image.file_type}")
 
     def test_add_image_3tags_created(self):
         response = self.add_image(tags=[{"name": "test1"}, {"name": "test2"}, {"name": "test3"}])
@@ -119,7 +119,7 @@ class AddImageTests(ImageTests):
 
         image = ImageMetadata.objects.all()[0]
         self.assertEqual(os.listdir(self.temp_dir.name)[0], f"{image.image_id}.{image.file_type}")
-        self.assertEqual(os.listdir(self.temp_static.name), [])
+        self.assertEqual(os.listdir(self.temp_media.name), [])
 
 
 class TagSearchTests(ImageTests):

@@ -129,10 +129,15 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 if not os.path.exists(STATIC_ROOT):
     os.makedirs(STATIC_ROOT)
 
-THUMBNAIL_SIZE = (100, 100)
+THUMBNAIL_SIZE = (640, 360)
 IMAGE_STORAGE = 'image_storage/'
 if not os.path.exists(IMAGE_STORAGE):
     os.makedirs(IMAGE_STORAGE)
+
+MEDIA_URL = 'images/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+if not os.path.exists(MEDIA_ROOT):
+    os.makedirs(MEDIA_ROOT)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

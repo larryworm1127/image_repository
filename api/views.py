@@ -49,7 +49,7 @@ class AddImage(APIView):
 
         # Save thumbnails of public image
         if image.is_public:
-            thumbnail.save(os.path.join(settings.STATIC_ROOT, f"{image.image_id}.{image.file_type}"))
+            thumbnail.save(os.path.join(settings.MEDIA_ROOT, f"{image.image_id}.{image.file_type}"))
 
         return Response(image_serializer.data, status=status.HTTP_201_CREATED)
 
