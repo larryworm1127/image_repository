@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from django.db import models
 
 
 class Tag(models.Model):
-    name = models.TextField(primary_key=True, max_length=50)
+    name = models.TextField(primary_key=True)
 
     def __str__(self):
         return f'Name={self.name}'
@@ -16,6 +18,7 @@ class ImageMetadata(models.Model):
     description = models.TextField(max_length=200, blank=True)
     is_public = models.BooleanField()
     location = models.TextField()
+    image_hash = models.TextField(max_length=256, unique=True)
 
     def __str__(self):
         return (

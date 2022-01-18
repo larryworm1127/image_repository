@@ -1,21 +1,17 @@
 from rest_framework import serializers
 
-from api.models import ImageMetadata, Tag, ImageTags
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ('name',)
+from api.models import ImageMetadata, ImageTags
 
 
 class ImageSerializer(serializers.ModelSerializer):
-    location = serializers.CharField(write_only=True)
-    file_type = serializers.CharField(max_length=10, write_only=True)
-
     class Meta:
         model = ImageMetadata
         fields = "__all__"
+        extra_kwargs = {
+            'location': {'write_only': True},
+            'file_type': {'write_only': True},
+            'image_hash': {'write_only': True}
+        }
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)

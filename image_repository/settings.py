@@ -121,12 +121,15 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+if not os.path.exists(STATIC_ROOT):
+    os.makedirs(STATIC_ROOT)
 
+THUMBNAIL_SIZE = (100, 100)
 IMAGE_STORAGE = 'image_storage/'
 if not os.path.exists(IMAGE_STORAGE):
     os.makedirs(IMAGE_STORAGE)

@@ -1,7 +1,10 @@
 import json
+import os
 
-from django.http import FileResponse
+import imagehash
+from PIL import Image
 from django.conf import settings
+from django.http import FileResponse
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.parsers import MultiPartParser
@@ -11,27 +14,41 @@ from rest_framework.views import APIView
 
 from api.models import Tag, ImageTags, ImageMetadata
 from api.serializer import ImageSerializer
-from api.view_utils import process_image_metadata
 
 
 class AddImage(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request):
-        print(request.data)
-        image_file = request.data['file']
         metadata = json.loads(request.data['metadata'])
         metadata['location'] = settings.IMAGE_STORAGE
 
-        # Process metadata before saving image to storage
-        message, image = process_image_metadata(metadata)
-        if image is None:
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        pil_image = Image.open(request.data['file'].file)
+        thumbnail = pil_image.copy()
+        thumbnail.thumbnail(size=settings.THUMBNAIL_SIZE)
+        metadata['image_hash'] = str(imagehash.average_hash(thumbnail, hash_size=32))
+        image_serializer = ImageSerializer(data=metadata)
 
-        with open(image.location, 'wb') as f:
-            f.write(image_file.file.read())
+        # Validate metadata before saving image to storage
+        if not image_serializer.is_valid():
+            return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(message, status=status.HTTP_201_CREATED)
+        image = image_serializer.save()
+        image.location = f"{image.location}{image.image_id}.{image.file_type}"
+        image.save()
+
+        for tag in metadata['tags']:
+            tag_obj, _ = Tag.objects.get_or_create(name=tag['name'])
+            image_tag = ImageTags.objects.create(image=image, tag=tag_obj)
+            image_tag.save()
+
+        pil_image.save(image.location)
+
+        # Save thumbnails of public image
+        if image.is_public:
+            thumbnail.save(os.path.join(settings.STATIC_ROOT, f"{image.image_id}.{image.file_type}"))
+
+        return Response(image_serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TagSearch(APIView):
