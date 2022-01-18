@@ -4,3 +4,4 @@ djangorestframework~=3.13.1
 fire~=0.4.0
 requests~=2.27.1
 ImageHash~=4.2.1
+numpy~=1.22.1

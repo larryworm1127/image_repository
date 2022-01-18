@@ -23,6 +23,7 @@ class AddImage(APIView):
         metadata = json.loads(request.data['metadata'])
         metadata['location'] = settings.IMAGE_STORAGE
 
+        # Create thumbnail and hash for image to prevent duplicates
         pil_image = Image.open(request.data['file'].file)
         thumbnail = pil_image.copy()
         thumbnail.thumbnail(size=settings.THUMBNAIL_SIZE)
@@ -33,12 +34,14 @@ class AddImage(APIView):
         if not image_serializer.is_valid():
             return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        # Set image storage location using the generated unique ID
         image = image_serializer.save()
         image.location = f"{image.location}{image.image_id}.{image.file_type}"
         image.save()
 
-        for tag in metadata['tags']:
-            tag_obj, _ = Tag.objects.get_or_create(name=tag['name'])
+        tags = set([tag['name'] for tag in metadata['tags']])  # Remove duplicate tags
+        for tag in tags:
+            tag_obj, _ = Tag.objects.get_or_create(name=tag)
             image_tag = ImageTags.objects.create(image=image, tag=tag_obj)
             image_tag.save()
 
