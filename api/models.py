@@ -1,9 +1,10 @@
-from __future__ import annotations
-
 from django.db import models
 
 
 class Tag(models.Model):
+    """
+    Model that represents a tag that categorizes the image.
+    """
     name = models.TextField(primary_key=True)
 
     def __str__(self):
@@ -11,6 +12,9 @@ class Tag(models.Model):
 
 
 class ImageMetadata(models.Model):
+    """
+    Model for storing various image metadata.
+    """
     image_id = models.BigAutoField(primary_key=True)
     name = models.TextField(max_length=50)
     file_type = models.TextField(max_length=10)
@@ -31,5 +35,8 @@ class ImageMetadata(models.Model):
 
 
 class ImageTags(models.Model):
+    """
+    Model for describing the tag categories that images have.
+    """
     image = models.ForeignKey(ImageMetadata, on_delete=models.DO_NOTHING)
     tag = models.ForeignKey(Tag, on_delete=models.DO_NOTHING)

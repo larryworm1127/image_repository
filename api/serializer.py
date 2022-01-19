@@ -4,6 +4,11 @@ from api.models import ImageMetadata, ImageTags
 
 
 class ImageSerializer(serializers.ModelSerializer):
+    """
+    Serializer for image metadata model. Certain fields are set to write only
+    as we don't want to expose them to the end users.
+    """
+
     class Meta:
         model = ImageMetadata
         fields = "__all__"

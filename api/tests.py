@@ -15,6 +15,9 @@ numpy.random.seed(0)
 
 
 class ImageTests(APITestCase):
+    """
+    Test base class that contains useful methods common to all the endpoint tests.
+    """
 
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
@@ -70,6 +73,9 @@ class ImageTests(APITestCase):
 
 
 class AddImageTests(ImageTests):
+    """
+    Test the AddImage view endpoint under various circumstances.
+    """
 
     def test_add_image_too_long_file_type(self):
         response = self.add_image(file_type="testtesttesttest")
@@ -123,6 +129,9 @@ class AddImageTests(ImageTests):
 
 
 class TagSearchTests(ImageTests):
+    """
+    Test the TagSearch view endpoint under various circumstances.
+    """
 
     def setUp(self) -> None:
         super().setUp()

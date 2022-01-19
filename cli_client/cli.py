@@ -1,11 +1,15 @@
 import imghdr
+import json
 import os.path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List
 
-from .client import add_image, Metadata, search_by_tags, get_image_file
+import imagehash
+from PIL import Image
 
-__all__ = ['add_single_image', 'add_multiple_images', 'tag_search', 'get_image']
+from .client import add_image, Metadata, search_by_tags, get_image_file, search_by_thumbnail
+
+__all__ = ['add_single_image', 'add_multiple_images', 'tag_search', 'get_image', 'thumbnail_search']
 
 
 def add_single_image(path: str, description: str = "", is_public: bool = True,
@@ -38,8 +42,11 @@ def add_single_image(path: str, description: str = "", is_public: bool = True,
         tags=[] if tags is None else [{"name": tag} for tag in tags]
     )
 
-    message = add_image(path, metadata)
-    print(message)
+    success, result = add_image(path, metadata)
+    if success:
+        print(f"Image {result['name']} created with ID {result['image_id']}")
+    else:
+        print(json.dumps(result, indent=2))
 
 
 def add_multiple_images(path: str, descriptions: List[str] = None,
@@ -85,8 +92,31 @@ def tag_search(tags: List[str]) -> None:
 
     :param tags: a list of tags to search the image by. (example: [tag1,tag2])
     """
-    response = search_by_tags(tags)
-    print(response)
+    success, response = search_by_tags(tags)
+    print(json.dumps(response, indent=2))
+
+
+def thumbnail_search(path: str) -> None:
+    """Search for images that are similar to the image at given path.
+
+    This command only prints out the metadata for the images. To get
+    the actual image, please use <get_image> command.
+
+    :params path: the file path to the image.
+    """
+    if not os.path.exists(path):
+        print(f"Given {path} does not exists.")
+        return
+
+    image_type = imghdr.what(path)
+    if image_type is None:
+        print(f"File at {path} is not an image.")
+        return
+
+    image = Image.open(path)
+    image_hash = str(imagehash.average_hash(image, hash_size=32))
+    success, result = search_by_thumbnail(image_hash)
+    print(json.dumps(result, indent=2))
 
 
 def get_image(image_id: int, path: str = ".") -> None:
@@ -102,5 +132,8 @@ def get_image(image_id: int, path: str = ".") -> None:
     if path == ".":
         path = os.path.abspath(path)
 
-    response = get_image_file(image_id, path, os.path.isdir(path))
-    print(response)
+    success, result = get_image_file(image_id, path, os.path.isdir(path))
+    if success:
+        print(f"Image {result} downloaded successfully")
+    else:
+        print(json.dumps(result, indent=2))

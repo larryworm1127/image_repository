@@ -4,11 +4,11 @@ import os
 import imagehash
 from PIL import Image
 from django.conf import settings
+from django.core.exceptions import BadRequest
 from django.http import FileResponse
 from rest_framework import status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.parsers import MultiPartParser
-from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -17,6 +17,9 @@ from api.serializer import ImageSerializer
 
 
 class AddImage(APIView):
+    """
+    View endpoint for adding a new image file with its metadata to the repository.
+    """
     parser_classes = [MultiPartParser]
 
     def post(self, request):
@@ -32,7 +35,7 @@ class AddImage(APIView):
 
         # Validate metadata before saving image to storage
         if not image_serializer.is_valid():
-            return Response(image_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(image_serializer.errors)
 
         # Set image storage location using the generated unique ID
         image = image_serializer.save()
@@ -55,10 +58,16 @@ class AddImage(APIView):
 
 
 class TagSearch(APIView):
+    """
+    View endpoint for searching images that contains specific tags
+    """
 
-    def get(self, request: Request):
+    def get(self, request):
+        if 'tags' not in request.query_params:
+            raise BadRequest("Invalid query parameters.")
+
         image_tags = None
-        for tag in json.loads(request.query_params.get('tags')):
+        for tag in set(json.loads(request.query_params.get('tags'))):
             try:
                 tag_obj = Tag.objects.get(name=tag)
             except Tag.DoesNotExist:
@@ -72,15 +81,29 @@ class TagSearch(APIView):
             image_tags = image_tags.intersection(curr)
 
         image_data = [
-            ImageSerializer(
-                ImageMetadata.objects.get(image_id=item['image_id'])
-            ).data
+            ImageSerializer(ImageMetadata.objects.get(image_id=item['image_id'])).data
             for item in image_tags
         ]
         return Response(image_data)
 
 
+class ThumbnailSearch(APIView):
+
+    def get(self, request):
+        if 'image_hash' not in request.query_params:
+            raise BadRequest("Invalid query parameters.")
+
+        image_hash = request.query_params.get("image_hash")
+
+        # Get hash for image for similarity search
+        similar = ImageMetadata.objects.filter(image_hash__exact=image_hash)
+        return Response([ImageSerializer(item).data for item in similar])
+
+
 class GetImage(APIView):
+    """
+    View endpoint for downloading specific image from the repository.
+    """
 
     def get(self, request, image_id):
         try:
